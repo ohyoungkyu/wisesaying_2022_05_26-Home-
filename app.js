@@ -26,7 +26,7 @@ app.use(cors(corsOptions));
 
 const port = 3000;
 
-//랜덤다건조회
+//랜덤단건조회시 조회수 1증가
 app.get("/wise_sayings/random", async (req, res) => {
   const [[wiseSayingRow]] = await pool.query(`
     SELECT *
@@ -43,6 +43,17 @@ app.get("/wise_sayings/random", async (req, res) => {
     return;
   }
 
+  await pool.query(
+    `
+  UPDATE wise_saying
+  SET hit_Count = hit_Count + 1
+  WHERE id = ?
+`,
+    [wiseSayingRow.id]
+  );
+
+  wiseSayingRow.hit_Count++;
+
   res.json({
     resultCode: "S-1",
     msg: "성공",
@@ -50,4 +61,6 @@ app.get("/wise_sayings/random", async (req, res) => {
   });
 });
 
-app.listen(port);
+app.listen(port, () => {
+  console.log(`Wise saying app listening on port ${port}`);
+});
